@@ -21,9 +21,13 @@ def generate_rsa_keys():
 # ----- SHA256 Hashing -----
 import hashlib
 
-def sha256_hash(filepath):
-    with open(filepath, "rb") as f:
-        data = f.read()
+def sha256_hash(file_or_path):
+    if hasattr(file_or_path, "read"):
+        data = file_or_path.read()
+        file_or_path.seek(0)  # Reset pointer for reuse
+    else:
+        with open(file_or_path, "rb") as f:
+            data = f.read()
     return hashlib.sha256(data).hexdigest()
 
 # ----- AES Encryption -----
@@ -40,10 +44,9 @@ def encrypt_file(filepath, key):
         plaintext = f.read()
     ciphertext = encryptor.update(plaintext) + encryptor.finalize()
 
-    with open(filepath + ".enc", "wb") as f:
-        f.write(iv + ciphertext)
-
-    return sha256_hash(filepath)
+    encrypted_data = iv + ciphertext
+    enc_hash = hashlib.sha256(encrypted_data).hexdigest()
+    return encrypted_data, enc_hash
 
 # ----- AES Decryption -----
 def decrypt_file(filepath, key):
@@ -54,6 +57,4 @@ def decrypt_file(filepath, key):
     cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
     decryptor = cipher.decryptor()
     plaintext = decryptor.update(ciphertext) + decryptor.finalize()
-
-    with open(filepath.replace(".enc", "_decrypted.txt"), "wb") as f:
-        f.write(plaintext)
+    return plaintext
