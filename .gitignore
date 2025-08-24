@@ -65,3 +65,7 @@ coverage.xml
 Thumbs.db
 
 keys/private.pem
+
+# Ignore encrypted and decrypted files
+files/encrypted
+files/decrypted
