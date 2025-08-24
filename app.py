@@ -26,7 +26,11 @@ def derive_key(password: str) -> bytes:
 # Streamlit UI
 st.title("🔐 CipherVault - File Encryption Tool")
 
-password = st.text_input("Enter Password:", type="password")
+password = st.text_input(
+    "Enter Password",
+    type="password",
+    placeholder="Type your password here"
+)
 uploaded_file = st.file_uploader("Select File to Encrypt/Decrypt")
 
 if uploaded_file and password:
