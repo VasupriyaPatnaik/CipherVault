@@ -63,3 +63,5 @@ coverage.xml
 # OS files
 .DS_Store
 Thumbs.db
+
+keys/private.pem
