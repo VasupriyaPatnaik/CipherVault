@@ -54,6 +54,9 @@ def decrypt_file(filepath, key):
         iv = f.read(16)
         ciphertext = f.read()
 
+    if len(iv) != 16 or not ciphertext:
+        raise ValueError("Encrypted file is empty or corrupted (missing IV or ciphertext).")
+
     cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
     decryptor = cipher.decryptor()
     plaintext = decryptor.update(ciphertext) + decryptor.finalize()
