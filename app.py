@@ -42,7 +42,8 @@ if uploaded_file and password:
 
     # Encrypt
     if st.button("Encrypt File"):
-        enc_file_path = os.path.join(ENCRYPTED_DIR, file_name + ".enc")
+        base_name = os.path.splitext(file_name)[0]
+        enc_file_path = os.path.join(ENCRYPTED_DIR, base_name + ".enc")
         encrypted_bytes, enc_hash = encrypt_file(file_path, key)
         with open(enc_file_path, "wb") as f:
             f.write(encrypted_bytes)
@@ -51,12 +52,13 @@ if uploaded_file and password:
         st.download_button(
             label="Download Encrypted File",
             data=encrypted_bytes,
-            file_name=file_name + ".enc"
+            file_name=base_name + ".enc"
         )
 
     # Decrypt
     if st.button("Decrypt File"):
-        dec_file_path = os.path.join(DECRYPTED_DIR, file_name.replace(".enc", "_decrypted.txt"))
+        base_name = os.path.splitext(file_name)[0]
+        dec_file_path = os.path.join(DECRYPTED_DIR, base_name + "_decrypted.txt")
         decrypted_bytes = decrypt_file(file_path, key)
         with open(dec_file_path, "wb") as f:
             f.write(decrypted_bytes)
