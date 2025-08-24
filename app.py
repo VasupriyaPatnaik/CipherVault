@@ -6,8 +6,9 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 # Directories
-ENCRYPTED_DIR = "encrypted_files"
-DECRYPTED_DIR = "decrypted_files"
+FILES_DIR = "files"
+ENCRYPTED_DIR = os.path.join(FILES_DIR, "encrypted")
+DECRYPTED_DIR = os.path.join(FILES_DIR, "decrypted")
 os.makedirs(ENCRYPTED_DIR, exist_ok=True)
 os.makedirs(DECRYPTED_DIR, exist_ok=True)
 
@@ -29,21 +30,24 @@ password = st.text_input("Enter Password:", type="password")
 uploaded_file = st.file_uploader("Select File to Encrypt/Decrypt")
 
 if uploaded_file and password:
-    file_bytes = uploaded_file.getvalue()
     file_name = uploaded_file.name
+    file_path = os.path.join(FILES_DIR, file_name)
+    with open(file_path, "wb") as f:
+        f.write(uploaded_file.getvalue())
 
     key = derive_key(password)
 
     st.write(f"**File Selected:** {file_name}")
-    st.write(f"**SHA256 (Original):** {sha256_hash(file_bytes)}")
+    st.write(f"**SHA256 (Original):** {sha256_hash(file_path)}")
 
     # Encrypt
     if st.button("Encrypt File"):
-        encrypted_bytes, enc_hash = encrypt_file(io.BytesIO(file_bytes), key)
+        enc_file_path = os.path.join(ENCRYPTED_DIR, file_name + ".enc")
+        encrypted_bytes, enc_hash = encrypt_file(file_path, key)
+        with open(enc_file_path, "wb") as f:
+            f.write(encrypted_bytes)
 
         st.success(f"✅ File Encrypted!\nSHA256: {enc_hash}")
-
-        # Provide BytesIO buffer for download
         st.download_button(
             label="Download Encrypted File",
             data=encrypted_bytes,
@@ -52,14 +56,14 @@ if uploaded_file and password:
 
     # Decrypt
     if st.button("Decrypt File"):
-        decrypted_bytes = decrypt_file(io.BytesIO(file_bytes), key)
+        dec_file_path = os.path.join(DECRYPTED_DIR, file_name.replace(".enc", "_decrypted.txt"))
+        decrypted_bytes = decrypt_file(file_path, key)
+        with open(dec_file_path, "wb") as f:
+            f.write(decrypted_bytes)
 
         st.success("✅ File Decrypted!")
-
-        # Provide BytesIO buffer for download
-        dec_name = file_name.replace(".enc", "_decrypted")
         st.download_button(
             label="Download Decrypted File",
             data=decrypted_bytes,
-            file_name=dec_name
+            file_name=os.path.basename(dec_file_path)
         )
